@@ -1,8 +1,6 @@
-import sys
 import praw
 import os
 import requests
-import json
 import time
 import urllib.parse
 from glob import glob
