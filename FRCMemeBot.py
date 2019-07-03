@@ -1,6 +1,8 @@
+import sys
 import praw
 import os
 import requests
+import json
 import time
 import urllib.parse
 from glob import glob
@@ -33,8 +35,8 @@ def tweet_creator(subreddit_info):
     post_ids = []
     print('!!getting posts!!')
     
-    for submission in subreddit_info.new(limit=10):
-        if not already_tweeted(submission.id):
+    for submission in subreddit_info.hot(limit= 1 + len(stickied_posts)):
+        if not already_tweeted(submission.id) and submission.id not in stickied_posts:
             post_dict[submission.title] = {}
             post = post_dict[submission.title]
             post['link'] = submission.permalink
@@ -49,8 +51,13 @@ def strip_title(title, character_amt):
         return title
     else:
         return title[:character_amt -1] + '...'
+
+def get_stickies(subreddit):
+    for sticky in subreddit.hot(limit=10):
+         if sticky.stickied:
+            stickied_posts.append(sticky.id)
         
-def get_image(img_url):
+def get_image(img_url):  
     if img_url:
          filename = os.path.basename(urllib.parse.urlsplit(img_url).path)
          img_path = IMAGE_DIR + '/' + filename
@@ -64,7 +71,7 @@ def get_image(img_url):
          else:
              print('!!! image failed to download. status code: ' + str(resp.status_code) + ' !!!')
     else:
-        print('!!!Post isnt an imgur link !!!')
+        print('!!!No Image!!!')
     return ''
 
 def tweeter(post_dict, post_ids):
@@ -74,7 +81,7 @@ def tweeter(post_dict, post_ids):
         img_path = post_dict[post]['img_path']
         
         extra_text = '' + post_dict[post]['link']
-        extra_text_len = 1 + T_CO_LINKS_LEN + len(TWEET_SUFFIX) 
+        extra_text_len = 1 + T_CO_LINKS_LEN
         if img_path:
             extra_text_len += T_CO_LINKS_LEN
         post_text = strip_title(post, MAX_CHARACTER_LENGTH - extra_text_len) + ' www.reddit.com' + extra_text
@@ -88,12 +95,12 @@ def tweeter(post_dict, post_ids):
         else:
             api.update_status(status=post_text)
         log_tweet(post_id)
-        time.sleep(30)
         
 def log_tweet(post_id):
     with open(POSTED_CACHE, 'a') as out_file:
         out_file.write(str(post_id) + '\n')
-    
+
+
 def already_tweeted(post_id):
     found = False
     with open(POSTED_CACHE, 'r') as in_file:
@@ -104,18 +111,21 @@ def already_tweeted(post_id):
     return found
 
 def main():
-    if not os.path.exists(POSTED_CACHE):
-        with open(POSTED_CACHE, 'w'):
-            pass
-    if not os.path.exists(IMAGE_DIR):
-        os.makedirs(IMAGE_DIR)
-        
     subreddit = setup_reddit_connection(SUBREDDIT)
-    post_dict, post_ids = tweet_creator(subreddit)
-    tweeter(post_dict, post_ids)
+    get_stickies(subreddit)
+    while True:
+        if not os.path.exists(POSTED_CACHE):
+           with open(POSTED_CACHE, 'w'):
+             pass
+        if not os.path.exists(IMAGE_DIR):
+            os.makedirs(IMAGE_DIR)
+
+        post_dict, post_ids = tweet_creator(subreddit)
+        tweeter(post_dict, post_ids)
     
-    for filename in glob(IMAGE_DIR + '/*'):
-        os.remove(filename)
+        for filename in glob(IMAGE_DIR + '/*'):
+           os.remove(filename)
+        time.sleep(300)
     
 if __name__ == '__main__':
     main()
