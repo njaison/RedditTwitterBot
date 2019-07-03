@@ -6,21 +6,22 @@ import urllib.parse
 from glob import glob
 from twython import Twython
 
-CONSUMER_KEY = 'zx28cDrlzCCnUX2JINSFzVRUD'
-CONSUMER_SECRET = 'KhtTDX0eANskPe0dyXtpmZxpSj9LohHKypQjoG8Q0JWlJWBv8Q'
-ACCESS_TOKEN = '1142179257797566466-6BtiNOKiRCKUWrBASokzJmhLK3OEfq'
-ACCESS_SECRET = 'snnc88NAIqaVcPOCdrR8hHzjpHHnR381djjyRd04e4lax'
+CONSUMER_KEY = ' '
+CONSUMER_SECRET = ' '
+ACCESS_TOKEN = ' '
+ACCESS_SECRET = ' '
 
 SUBREDDIT = 'dankmemes'
-IMAGE_DIR = '/home/pi/Documents/TweetBot/images'
-POSTED_CACHE = '/home/pi/Documents/TweetBot/cache.txt'
+IMAGE_DIR = ' '
+POSTED_CACHE = ' '
 MAX_CHARACTER_LENGTH = 280
 T_CO_LINKS_LEN = 24
-TWEET_SUFFIX = ''
 
-CLIENT_ID = 'ORHnTsw77vaagA'
-CLIENT_SECRET = 'KrDlJx11AdDQW9j2YwaYSHcLrs4'
-USER_AGENT = 'frc twitter'
+CLIENT_ID = ' '
+CLIENT_SECRET = ' '
+USER_AGENT = ' '
+
+stickied_posts=[]
 
 def setup_reddit_connection(subreddit):
     print('!!setting up reddit connection!!')
